@@ -16,7 +16,7 @@ class FirstPage extends StatefulWidget {
 }
 
 class _FirstPageState extends State<FirstPage> {
-  bool isLoading = false;
+  bool isLoading = true;
   Future<UserCredential?> login() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(

@@ -100,7 +100,7 @@ class DetailMovie extends StatelessWidget {
                   const SizedBox(height: 6),
 
                   Text(
-                    movie.overview,
+                    movie.displayOverview,
                     style: GoogleFonts.openSans(
                       fontSize: 14,
                       color: Colors.white70,
