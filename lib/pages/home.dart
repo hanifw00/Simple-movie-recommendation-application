@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/auth_service.dart';
 import '../models/movie_model.dart';
 import '../services/movie_service.dart';
 import '../config/api_config.dart';
@@ -111,145 +113,311 @@ class _HomePageState extends State<HomePage> {
       searchMovie(query);
     });
   }
+  
+//   
+void _showLogoutDialog() {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      bool isLoading = false;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-      leading: Image.asset("assets/images/logo_splash.png",
-      fit: BoxFit.contain,),
-      title: isSearchActive
-    ? TextField(
-        controller: searchController,
-        onChanged: onSearchChanged, 
-        autofocus: true,
-        style: const TextStyle(color: Colors.white),
-        decoration: const InputDecoration(
-          hintText: 'Cari film...',
-          hintStyle: TextStyle(color: Colors.white54),
-          border: InputBorder.none,
-        ),
-      )
-    : Text(
-        'Popular Movies',
-        style: GoogleFonts.montserrat(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: Icon(
-            isSearchActive ? Icons.close : Icons.search,
-            color: Colors.white,
-            size: 28,
-          ),
-          onPressed: () {
-            setState(() {
-              if (isSearchActive) {               
-                isSearchActive = false;
-                searchController.clear();
-                searchMovie("");
-              } else {
-                // buka search
-                isSearchActive = true;
-              }
-            });
-          },
-        ),
-      ],
-      backgroundColor: Colors.black87,
-      ),
-      body: GridView.builder(
-        controller: _scrollController,
-        padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.6,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-        ),
-        itemCount: movies.length,
-        itemBuilder: (context, index) {
-          final movie = movies[index];
-          final imageUrl =
-              '${ApiConfig.imageBaseUrl}${movie.posterPath}';
-
-          return GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                AppRoutes.movieDetail,
-                arguments: movie,
-              );
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return Dialog(
+            backgroundColor: const Color(0xFF121212),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Stack(
               children: [
-                Expanded(
-                  child: Stack(
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.broken_image),
+                      Text(
+                        'AmFlix',
+                        style: GoogleFonts.anton(
+                          fontSize: 22,
+                          color: const Color(0xffBF092F),
+                          letterSpacing: 1.2,
                         ),
                       ),
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 14),
-                              const SizedBox(width: 4),
-                              Text(
-                                movie.rating.toStringAsFixed(1),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Yakin ingin keluar dari akun ini?',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
                         ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: isLoading
+                                ? null
+                                : () => Navigator.pop(context),
+                            child: const Text(
+                              'Batal',
+                              style: TextStyle(color: Colors.white54),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xffBF092F),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: isLoading
+                              ? null
+                              : () async {
+                                  setDialogState(() => isLoading = true);
+
+                                  await AuthService.logout(context);
+                                },
+                            child: const Text(
+                              'Logout',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 6),
-                Center(
-                  child: Text(
-                    movie.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+
+                if (isLoading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           );
         },
-      ),
+      );
+    },
+  );
+}
+
+      
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+          leadingWidth: 34,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: PopupMenuButton<String>(
+              offset: const Offset(0, 48),
+              color: const Color(0xFF1E1E1E), // 👈 background popup
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+             ),
+              onSelected: (value) {
+                if (value == 'logout') {
+                  _showLogoutDialog();
+                }
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, 
+                      size: 12,
+                      color: Color(0xffBF092F),
+                      ),
+                      SizedBox(width: 4),
+                      Text('Logout',
+                      style: TextStyle(
+                        color: Color(0xffBF092F),
+                        fontSize: 14,
+                      ),)
+                    ],
+                  ),
+                ),
+              ],
+              child: CircleAvatar(
+                backgroundColor: Colors.blue[400],
+                radius: 12,
+                backgroundImage:
+                    FirebaseAuth.instance.currentUser?.photoURL != null
+                        ? NetworkImage(
+                            FirebaseAuth.instance.currentUser!.photoURL!,
+                          )
+                        : null,
+                child: FirebaseAuth.instance.currentUser?.photoURL == null
+                    ? const Icon(Icons.person)
+                    : null,
+              ),
+            ),
+          ),
+          title: isSearchActive
+        ? TextField(
+            controller: searchController,
+            onChanged: onSearchChanged, 
+            autofocus: true,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              hintText: 'Cari film...',
+              hintStyle: TextStyle(color: Colors.white54),
+              border: InputBorder.none,
+            ),
+          )
+        : Text(
+            'Popular Movies',
+            style: GoogleFonts.anton(
+              fontSize: 22,
+              letterSpacing: 0.5,
+              // fontWeight: FontWeight.bold,
+              color: const Color(0xffBF092F),
+              
+            ),
+          ),
+        
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: Icon(
+                isSearchActive ? Icons.close : Icons.search,
+                color:  Colors.white70,
+                size: 28,
+              ),
+              onPressed: () {
+                setState(() {
+                  if (isSearchActive) {               
+                    isSearchActive = false;
+                    searchController.clear();
+                    searchMovie("");
+                  } else {
+                    // buka search
+                    isSearchActive = true;
+                  }
+                });
+              },
+            ),
+          ],
+          backgroundColor: Colors.black87,
+          ),
+          body: GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.6,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+            ),
+            itemCount: movies.length,
+            itemBuilder: (context, index) {
+              final movie = movies[index];
+              final imageUrl =
+                  '${ApiConfig.imageBaseUrl}${movie.posterPath}';
+        
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.movieDetail,
+                    arguments: movie,
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (_, _, _) =>
+                                  const Icon(Icons.broken_image),
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black87,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.star,
+                                      color: Colors.amber, size: 14),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    movie.rating.toStringAsFixed(1),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Center(
+                      child: Text(
+                        movie.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        if (isLoading)
+          Container(
+            color: Colors.black87,
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            ),
+          ),
+      ],
     );
+    
   }
 }
 

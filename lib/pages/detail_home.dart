@@ -37,10 +37,9 @@ class DetailMovie extends StatelessWidget {
         )
         ),
         centerTitle: true,
-        actions: [Image.asset("assets/images/logo_splash.png",
-       
-        )
-        ],
+        actions: [Image.asset("assets/images/launch_icon.png",)
+        ]
+        
         
       ),
       body: SingleChildScrollView(

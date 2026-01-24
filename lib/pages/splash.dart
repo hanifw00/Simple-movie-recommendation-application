@@ -22,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Image.asset("assets/images/logo_splash.png"),
+        child: Image.asset("assets/images/launch_icon.png"),
       ),
     );
   }

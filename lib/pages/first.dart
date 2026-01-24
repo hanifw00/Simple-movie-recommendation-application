@@ -3,28 +3,30 @@ import 'package:amflix/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class first extends StatefulWidget {
-  const first({super.key});
+class First extends StatefulWidget {
+  const First({super.key});
 
   @override
-  State<first> createState() => _firstState();
+  State<First> createState() => _FirstState();
 }
 
-class _firstState extends State<first> {
+class _FirstState extends State<First> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black ,
       body: Column(
         children: [
-          
-             Padding(
-              padding: const EdgeInsets.only(top: 326, left: 109, right: 109),
-              child: Image.asset("assets/images/title.png"),
-            ),
 
-            SizedBox(height: 20,),
-
+           Padding(
+             padding: const EdgeInsets.only(top: 140),
+             child: Center(
+                child: Image.asset("assets/images/launch_icon.png",
+                height: 450,
+                width: 420,),
+              ),
+           ),
+                    
             SizedBox(
               height:62 ,
               width: 322,
@@ -39,7 +41,7 @@ class _firstState extends State<first> {
               Text("Mulai",
               style: GoogleFonts.roboto(
                 color: Color(0xffF2EDED),
-                fontSize: 22,
+                fontSize: 17,
                 fontWeight: FontWeight.bold,
               ),)),
             )
